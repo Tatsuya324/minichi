@@ -1,36 +1,45 @@
 <template>
   <div id="app">
-    <div v-if="disp_flag.isEnrollModal" id="enroll_modal" @click.self="Modal_trans_data()">
+    <div
+      v-if="disp_flag.isEnrollModal"
+      id="enroll_modal"
+      @click.self="Modal_trans_data()"
+    >
       <div id="modal_content">
         <div id="modal_title">
-          {{modal_info.title}}
+          {{ modal_info.title }}
         </div>
         <div id="modal_description">
-          {{modal_info.description}}
+          {{ modal_info.description }}
         </div>
-        <p class="modal_label">
-          参加者{{modal_info.participants}}人
-        </p>
-        <p class="modal_label">
-          かかった時間
-        </p>
+        <p class="modal_label">参加者{{ modal_info.participants }}人</p>
+        <p class="modal_label">かかった時間</p>
         <div>
-          <input id="modal_input_time" type="number" >
+          <input id="modal_input_time" type="number" />
           秒
         </div>
-        <div id="modal_submit_button">
-          ランキングに登録
-        </div>
+        <div id="modal_submit_button">ランキングに登録</div>
       </div>
     </div>
     <div id="nav">
-      <input id="input" placeholder="みんなの一番を調べる" type="text" @input="Update_Ranks" v-model="search_text">
-        <img id="logo_img" src="./assets/logo.png" alt="">
+      <input
+        id="input"
+        placeholder="みんなの一番を調べる"
+        type="text"
+        @input="Update_Ranks"
+        v-model="search_text"
+      />
+      <img id="logo_img" src="./assets/logo.png" alt="" />
       <div>
         <div id="signin_container">
-          <div id="signin_button">
-            SIGN IN
+          <div v-if="isLogin">
+            <img
+              style="width: 50px; margin-right: 15px; border-radius: 15px; box-shadow: 0 5px 10px 1px rgb(200, 200, 200);"
+              v-bind:src="authUserIcon"
+              alt=""
+            />
           </div>
+          <div v-else id="signin_button" @click="signIn">SIGN IN</div>
         </div>
       </div>
     </div>
@@ -38,48 +47,65 @@
     <div id="main">
       <div v-if="disp_flag.isLP" id="LP_container">
         <h1 id="LP_title">みんなの一番とは？？</h1>
-        <p class="LP_text" style="border-radius: 99px 99px 99px 0; left: -180px">
+        <p
+          class="LP_text"
+          style="border-radius: 99px 99px 99px 0; left: -180px"
+        >
           この経験は僕・私が「一番」だ！！
         </p>
-        <p class="LP_text" style="border-radius: 99px 99px 0 99px; right: -230px; top: -40px">
+        <p
+          class="LP_text"
+          style="border-radius: 99px 99px 0 99px; right: -230px; top: -40px"
+        >
           この経験をランキング化するみんなが主役のプラットフォームです
         </p>
-        <p class="LP_text" style="border-radius: 99px 99px 99px 0; left: -250px; top: -60px">
+        <p
+          class="LP_text"
+          style="border-radius: 99px 99px 99px 0; left: -250px; top: -60px"
+        >
           まずは画面上部の検索バーからランキングを検索しよう！
         </p>
-        <p class="LP_text" style="border-radius: 99px 99px 0 99px; right: -230px; top: -40px">
+        <p
+          class="LP_text"
+          style="border-radius: 99px 99px 0 99px; right: -230px; top: -40px"
+        >
           ランキングが見つかったら、そのランキングに自分の記録を登録！！
         </p>
-        <p class="LP_text" style="border-radius: 99px 99px 99px 0; left: -210px; top: -70px">
+        <p
+          class="LP_text"
+          style="border-radius: 99px 99px 99px 0; left: -210px; top: -70px"
+        >
           もし、ランキングがない場合はあなたがそのランキングを作り、新たなランキングを作成しましょう！！
         </p>
-        <p class="LP_text" style="border-radius: 99px 99px 0 99px; right: -200px; top: -80px">
+        <p
+          class="LP_text"
+          style="border-radius: 99px 99px 0 99px; right: -200px; top: -80px"
+        >
           その時はキミが「一番」だ！！
         </p>
       </div>
       <div v-if="disp_flag.isNotRankCard" style="padding: 30px">
-        <p style="font-size:20px; font-weight:bold;">まだランキングが作られていないようです...</p>
+        <p style="font-size: 20px; font-weight: bold">
+          まだランキングが作られていないようです...
+        </p>
       </div>
       <div v-if="disp_flag.isRankCard" id="search_result_container">
-        <div v-for="(rank_info, rank_index) in disp_rank_card_infos"
-        v-bind:key="rank_index"
-        class="rank_card_container"
-        @click="Modal_trans_data(rank_info)"
+        <div
+          v-for="(rank_info, rank_index) in disp_rank_card_infos"
+          v-bind:key="rank_index"
+          class="rank_card_container"
+          @click="Modal_trans_data(rank_info)"
         >
           <span class="rank_card_title">
-            {{rank_info.title}}
+            {{ rank_info.title }}
           </span>
           <div class="rank_card_description_container">
             <div class="rank_card_description">
-              {{rank_info.description}}
+              {{ rank_info.description }}
             </div>
             <div class="rank_card_participants">
-              <span>
-                参加者数 
-              </span>
-              <span>
-                {{rank_info.participants}} 人
-              </span>
+              <span> 参加者数 </span>
+              <span> {{ rank_info.participants }} 人 </span>
             </div>
           </div>
         </div>
@@ -87,24 +113,20 @@
       <div v-if="disp_flag.isSubmit" id="submit_container">
         <h2 id="submit_title">ランキングを作ってみましょう！</h2>
         <div id="submit_form_container">
-          <p class="form_label">
-            タイトル
-          </p>
-          <input id="input_title" type="text" placeholder="ランキングのタイトルを入力">
-          <p class="form_label">
-            説明
-          </p>
+          <p class="form_label">タイトル</p>
+          <input
+            id="input_title"
+            type="text"
+            placeholder="ランキングのタイトルを入力"
+          />
+          <p class="form_label">説明</p>
           <textarea name="説明" cols="30" rows="10"></textarea>
-          <p class="form_label">
-            かかった時間
-          </p>
+          <p class="form_label">かかった時間</p>
           <div>
-            <input id="input_time" type="number">
+            <input id="input_time" type="number" />
             秒
           </div>
-          <div id="submit_button">
-            ランキングを作る
-          </div>
+          <div id="submit_button">ランキングを作る</div>
         </div>
       </div>
     </div>
@@ -116,12 +138,15 @@
 </template>
 
 <script>
-// import MenubarIcon from "./assets/icon/bars_icon.svg";
+import firebase from "firebase";
 
 export default {
   name: "App",
   data() {
     return {
+      isLogin: false,
+      authUserIcon: "",
+      authUid: "",
       search_text: "",
       disp_flag: {
         isRankCard: false,
@@ -130,10 +155,10 @@ export default {
         isSubmit: true,
         isEnrollModal: false,
       },
-      modal_info:{
+      modal_info: {
         title: "",
         description: "",
-        participants: ""
+        participants: "",
       },
       disp_rank_card_infos: [],
       rank_card_infos: [
@@ -157,23 +182,26 @@ export default {
           description: "これは説明ですタイトル４",
           participants: 300,
         },
-      ]
+      ],
     };
   },
   methods: {
     Update_Ranks() {
       this.disp_rank_card_infos = [];
-      if(this.search_text != "") {
+      if (this.search_text != "") {
         this.disp_flag.isRankCard = true;
         this.disp_flag.isLP = false;
         for (let Target_Key in this.rank_card_infos) {
-          if (this.rank_card_infos[Target_Key].title.indexOf(this.search_text) > -1) {
+          if (
+            this.rank_card_infos[Target_Key].title.indexOf(this.search_text) >
+            -1
+          ) {
             this.disp_rank_card_infos.push(this.rank_card_infos[Target_Key]);
           }
         }
-        if(this.disp_rank_card_infos.length == 0) {
+        if (this.disp_rank_card_infos.length == 0) {
           this.disp_flag.isNotRankCard = true;
-        }else{
+        } else {
           this.disp_flag.isNotRankCard = false;
         }
       } else {
@@ -181,19 +209,36 @@ export default {
         this.disp_flag.isNotRankCard = false;
         this.disp_flag.isLP = true;
       }
-      console.log(this.disp_flag.isRankCard)
-      console.log(this.disp_flag.isNotRankCard)
+      console.log(this.disp_flag.isRankCard);
+      console.log(this.disp_flag.isNotRankCard);
     },
     Modal_trans_data(from) {
-      if(from){
+      if (from) {
         this.modal_info.title = from.title;
         this.modal_info.description = from.description;
         this.modal_info.participants = from.participants;
         this.disp_flag.isEnrollModal = true;
-      }else{
+      } else {
         this.disp_flag.isEnrollModal = false;
       }
-    }
+    },
+    signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase
+        .auth()
+        .signInWithPopup(provider)
+        .then((user) => {
+          if (user) {
+            // !!userはBoolen変更後反転
+            this.isLogin = !!user;
+            this.authUserIcon = user.user.photoURL;
+            this.authUid = user.user.uid;
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
   },
 };
 </script>
@@ -204,10 +249,10 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #040C0C;
+  color: #040c0c;
 }
 
-#enroll_modal{
+#enroll_modal {
   width: 100vw;
   height: 100vh;
   position: fixed;
@@ -216,7 +261,7 @@ export default {
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 2000;
-  #modal_content{
+  #modal_content {
     width: 600px;
     height: 500px;
     background-color: #fff;
@@ -227,20 +272,20 @@ export default {
     align-items: center;
     flex-direction: column;
     z-index: 2100;
-    #modal_title{
+    #modal_title {
       width: 100%;
       height: 50px;
       color: #fff;
       font-size: 25px;
       font-weight: bold;
-      background-color: #0434EC;
+      background-color: #0434ec;
       border-radius: 15px 15px 0 0;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
     }
-    #modal_description{
+    #modal_description {
       width: 90%;
       height: 220px;
       padding: 10px;
@@ -250,24 +295,24 @@ export default {
       justify-content: flex-start;
       align-items: flex-start;
     }
-    .modal_label{
+    .modal_label {
       font-size: 20px;
       font-weight: bold;
       margin-top: 20px;
     }
-    #modal_input_time{
+    #modal_input_time {
       outline: none;
       width: 100px;
-      height:30px;
+      height: 30px;
       border-radius: 20px;
       padding: 10px;
       border: solid #2c3e50 1px;
-      text-align: right
+      text-align: right;
     }
-    #modal_submit_button{
+    #modal_submit_button {
       cursor: pointer;
       color: #fff;
-      background-color: #0434EC;
+      background-color: #0434ec;
       width: 250px;
       height: 50px;
       margin-top: 20px;
@@ -278,7 +323,7 @@ export default {
       font-weight: bold;
       border-radius: 99px;
       box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
-      &:hover{
+      &:hover {
         box-shadow: 0 1px 1px 1px rgb(200, 200, 200);
       }
     }
@@ -290,7 +335,7 @@ export default {
   width: 100vw;
   height: 80px;
   position: fixed;
-  background-color: #DCEEFC;
+  background-color: #dceefc;
   padding: 10px 0;
   display: flex;
   justify-content: space-between;
@@ -308,10 +353,10 @@ export default {
     border: solid #2c3e50 1px;
     border-radius: 999px;
   }
-  #logo_img{
+  #logo_img {
     width: 250px;
   }
-  #signin_container{
+  #signin_container {
     width: 30%;
     min-width: 400px;
     max-width: 600px;
@@ -321,12 +366,12 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    #signin_button{
+    #signin_button {
       width: 150px;
       height: 40px;
       cursor: pointer;
       color: #fff;
-      background-color: #0434EC;
+      background-color: #0434ec;
       border-radius: 99px;
       box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
       font-size: 20px;
@@ -334,14 +379,14 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
-      &:hover{
+      &:hover {
         box-shadow: 0 1px 1px 1px rgb(200, 200, 200);
       }
     }
   }
 }
 
-#main{
+#main {
   padding-top: 100px;
   width: 100vw;
   display: flex;
@@ -350,8 +395,7 @@ export default {
   flex-direction: column;
 }
 
-
-#LP_container{
+#LP_container {
   width: 95%;
   // height: 500px;
   padding-top: 20px;
@@ -360,16 +404,16 @@ export default {
   align-items: center;
   flex-direction: column;
   position: relative;
-  #LP_title{
+  #LP_title {
     color: #fff;
     padding: 20px 60px;
     margin-bottom: 30px;
-    background-color: #0434EC;
+    background-color: #0434ec;
     border-radius: 999px 10px;
     box-shadow: 0 5px 10px 1px rgb(220, 220, 220);
   }
-  .LP_text{
-    color: #040C0C;
+  .LP_text {
+    color: #040c0c;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -382,8 +426,7 @@ export default {
   }
 }
 
-
-#search_result_container{
+#search_result_container {
   width: 60%;
   max-width: 800px;
   display: flex;
@@ -391,7 +434,7 @@ export default {
   align-items: flex-start;
   flex-direction: row;
   flex-wrap: wrap;
-  .rank_card_container{
+  .rank_card_container {
     cursor: pointer;
     box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
     width: 350px;
@@ -405,11 +448,11 @@ export default {
     &:hover {
       box-shadow: 0 1px 10px 1px rgb(200, 200, 200);
     }
-    .rank_card_title{
+    .rank_card_title {
       width: 100%;
       height: 35px;
       padding: 3px;
-      background-color: #0434EC;
+      background-color: #0434ec;
       border-radius: 10px 10px 0 0;
       display: flex;
       justify-content: center;
@@ -418,17 +461,17 @@ export default {
       color: white;
       font-weight: bold;
     }
-    .rank_card_description_container{
+    .rank_card_description_container {
       width: 95%;
       height: 115px;
-      .rank_card_description{
+      .rank_card_description {
         width: 100%;
         height: 90px;
         display: flex;
         justify-content: center;
         align-items: center;
       }
-      .rank_card_participants{
+      .rank_card_participants {
         width: 100%;
         height: 25px;
         padding: 2px;
@@ -441,22 +484,22 @@ export default {
   }
 }
 
-#submit_container{
+#submit_container {
   width: 100%;
   padding-top: 20px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
-  #submit_title{
+  #submit_title {
     color: #fff;
     padding: 20px 60px;
     margin: 30px;
-    background-color: #0434EC;
+    background-color: #0434ec;
     border-radius: 10px 999px;
     box-shadow: 0 5px 10px 1px rgb(220, 220, 220);
   }
-  #submit_form_container{
+  #submit_form_container {
     width: 40%;
     min-width: 500px;
     padding: 30px;
@@ -467,43 +510,43 @@ export default {
     justify-content: flex-start;
     align-items: center;
     flex-direction: column;
-    .form_label{
+    .form_label {
       font-size: 20px;
       font-weight: bold;
       margin-top: 20px;
     }
-    #input_title{
+    #input_title {
       outline: none;
       width: 80%;
-      min-width:300px;
-      height:30px;
+      min-width: 300px;
+      height: 30px;
       border-radius: 20px;
       padding: 10px;
       border: solid #2c3e50 1px;
     }
-    #input_time{
+    #input_time {
       outline: none;
       width: 100px;
-      height:30px;
+      height: 30px;
       border-radius: 20px;
       padding: 10px;
       border: solid #2c3e50 1px;
-      text-align: right
+      text-align: right;
     }
     textarea {
       outline: none;
       resize: none;
       width: 80%;
-      min-width:300px;
-      height:200px;
+      min-width: 300px;
+      height: 200px;
       border-radius: 10px;
       padding: 10px;
       border: solid #2c3e50 1px;
     }
-    #submit_button{
+    #submit_button {
       cursor: pointer;
       color: #fff;
-      background-color: #0434EC;
+      background-color: #0434ec;
       width: 250px;
       height: 50px;
       margin-top: 20px;
@@ -514,15 +557,15 @@ export default {
       font-weight: bold;
       border-radius: 99px;
       box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
-      &:hover{
+      &:hover {
         box-shadow: 0 1px 1px 1px rgb(200, 200, 200);
       }
     }
   }
 }
 
-#footer_container{
-  background-color: #DCEEFC;
+#footer_container {
+  background-color: #dceefc;
   width: 100vw;
   padding: 10px 0;
   display: flex;
@@ -530,7 +573,6 @@ export default {
   align-items: center;
   flex-direction: row;
 }
-
 
 /* A Modern CSS Reset */
 *,

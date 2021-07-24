@@ -1,11 +1,36 @@
 <template>
   <div id="app">
+    <div v-if="disp_flag.isEnrollModal" id="enroll_modal" @click.self="Modal_trans_data()">
+      <div id="modal_content">
+        <div id="modal_title">
+          {{modal_info.title}}
+        </div>
+        <div id="modal_description">
+          {{modal_info.description}}
+        </div>
+        <p class="modal_label">
+          参加者{{modal_info.participants}}人
+        </p>
+        <p class="modal_label">
+          かかった時間
+        </p>
+        <div>
+          <input id="modal_input_time" type="number" >
+          秒
+        </div>
+        <div id="modal_submit_button">
+          ランキングに登録
+        </div>
+      </div>
+    </div>
     <div id="nav">
       <input id="input" placeholder="みんなの一番を調べる" type="text" @input="Update_Ranks" v-model="search_text">
         <img id="logo_img" src="./assets/logo.png" alt="">
       <div>
-        <div id="sign_container">
-          <span>SIGN IN</span>
+        <div id="signin_container">
+          <div id="signin_button">
+            SIGN IN
+          </div>
         </div>
       </div>
     </div>
@@ -39,6 +64,7 @@
         <div v-for="(rank_info, rank_index) in disp_rank_card_infos"
         v-bind:key="rank_index"
         class="rank_card_container"
+        @click="Modal_trans_data(rank_info)"
         >
           <span class="rank_card_title">
             {{rank_info.title}}
@@ -102,6 +128,12 @@ export default {
         isNotRankCard: false,
         isLP: true,
         isSubmit: true,
+        isEnrollModal: false,
+      },
+      modal_info:{
+        title: "",
+        description: "",
+        participants: ""
       },
       disp_rank_card_infos: [],
       rank_card_infos: [
@@ -141,6 +173,8 @@ export default {
         }
         if(this.disp_rank_card_infos.length == 0) {
           this.disp_flag.isNotRankCard = true;
+        }else{
+          this.disp_flag.isNotRankCard = false;
         }
       } else {
         this.disp_flag.isRankCard = false;
@@ -150,6 +184,16 @@ export default {
       console.log(this.disp_flag.isRankCard)
       console.log(this.disp_flag.isNotRankCard)
     },
+    Modal_trans_data(from) {
+      if(from){
+        this.modal_info.title = from.title;
+        this.modal_info.description = from.description;
+        this.modal_info.participants = from.participants;
+        this.disp_flag.isEnrollModal = true;
+      }else{
+        this.disp_flag.isEnrollModal = false;
+      }
+    }
   },
 };
 </script>
@@ -161,6 +205,84 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #040C0C;
+}
+
+#enroll_modal{
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  #modal_content{
+    width: 600px;
+    height: 500px;
+    background-color: #fff;
+    border-radius: 15px;
+    position: absolute;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    z-index: 2100;
+    #modal_title{
+      width: 100%;
+      height: 50px;
+      color: #fff;
+      font-size: 25px;
+      font-weight: bold;
+      background-color: #0434EC;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #modal_description{
+      width: 90%;
+      height: 220px;
+      padding: 10px;
+      font-size: 17px;
+      font-weight: bold;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+    .modal_label{
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    #modal_input_time{
+      outline: none;
+      width: 100px;
+      height:30px;
+      border-radius: 20px;
+      padding: 10px;
+      border: solid #2c3e50 1px;
+      text-align: right
+    }
+    #modal_submit_button{
+      cursor: pointer;
+      color: #fff;
+      background-color: #0434EC;
+      width: 250px;
+      height: 50px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 99px;
+      box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
+      &:hover{
+        box-shadow: 0 1px 1px 1px rgb(200, 200, 200);
+      }
+    }
+  }
 }
 
 #nav {
@@ -189,13 +311,33 @@ export default {
   #logo_img{
     width: 250px;
   }
-  #sign_container{
+  #signin_container{
     width: 30%;
     min-width: 400px;
     max-width: 600px;
     height: 50px;
     padding: 10px;
     margin-right: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    #signin_button{
+      width: 150px;
+      height: 40px;
+      cursor: pointer;
+      color: #fff;
+      background-color: #0434EC;
+      border-radius: 99px;
+      box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      &:hover{
+        box-shadow: 0 1px 1px 1px rgb(200, 200, 200);
+      }
+    }
   }
 }
 

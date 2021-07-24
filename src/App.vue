@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="nav">
-      <input id="input" placeholder="みんなの一番を調べる" type="text">
+      <input id="input" placeholder="みんなの一番を調べる" type="text" @input="Update_Ranks" v-model="search_text">
         <img id="logo_img" src="./assets/logo.png" alt="">
       <div>
         <div id="sign_container">
@@ -11,7 +11,31 @@
     </div>
     <!-- -----------メインエリアSTART----------- -->
     <div id="main">
-      <div id="search_result_container">
+      <div v-if="disp_flag.isLP" id="LP_container">
+        <h1 id="LP_title">みんなの一番とは？？</h1>
+        <p class="LP_text" style="border-radius: 99px 99px 99px 0; left: -180px">
+          この経験は僕・私が「一番」だ！！
+        </p>
+        <p class="LP_text" style="border-radius: 99px 99px 0 99px; right: -230px; top: -40px">
+          この経験をランキング化するみんなが主役のプラットフォームです
+        </p>
+        <p class="LP_text" style="border-radius: 99px 99px 99px 0; left: -250px; top: -60px">
+          まずは画面上部の検索バーからランキングを検索しよう！
+        </p>
+        <p class="LP_text" style="border-radius: 99px 99px 0 99px; right: -230px; top: -40px">
+          ランキングが見つかったら、そのランキングに自分の記録を登録！！
+        </p>
+        <p class="LP_text" style="border-radius: 99px 99px 99px 0; left: -210px; top: -70px">
+          もし、ランキングがない場合はあなたがそのランキングを作り、新たなランキングを作成しましょう！！
+        </p>
+        <p class="LP_text" style="border-radius: 99px 99px 0 99px; right: -200px; top: -80px">
+          その時はキミが「一番」だ！！
+        </p>
+      </div>
+      <div v-if="disp_flag.isNotRankCard" style="padding: 30px">
+        <p style="font-size:20px; font-weight:bold;">まだランキングが作られていないようです...</p>
+      </div>
+      <div v-if="disp_flag.isRankCard" id="search_result_container">
         <div v-for="(rank_info, rank_index) in disp_rank_card_infos"
         v-bind:key="rank_index"
         class="rank_card_container"
@@ -19,9 +43,9 @@
           <span class="rank_card_title">
             {{rank_info.title}}
           </span>
-          <div class="rank_card_discription_container">
-            <div class="rank_card_discription">
-              {{rank_info.discription}}
+          <div class="rank_card_description_container">
+            <div class="rank_card_description">
+              {{rank_info.description}}
             </div>
             <div class="rank_card_participants">
               <span>
@@ -34,23 +58,33 @@
           </div>
         </div>
       </div>
+      <div v-if="disp_flag.isSubmit" id="submit_container">
+        <h2 id="submit_title">ランキングを作ってみましょう！</h2>
+        <div id="submit_form_container">
+          <p class="form_label">
+            タイトル
+          </p>
+          <input id="input_title" type="text" placeholder="ランキングのタイトルを入力">
+          <p class="form_label">
+            説明
+          </p>
+          <textarea name="説明" cols="30" rows="10"></textarea>
+          <p class="form_label">
+            かかった時間
+          </p>
+          <div>
+            <input id="input_time" type="number">
+            秒
+          </div>
+          <div id="submit_button">
+            ランキングを作る
+          </div>
+        </div>
+      </div>
     </div>
     <!-- -----------メインエリアEND----------- -->
     <div id="footer_container">
-      <h2>みんなの一番 について</h2>
-      <div id="footer_discription_container">
-        <div class="footer_discription">
-          <h3>自分の一番だと思うランキングに参加しよう！</h3>
-          <p>日頃の生活の中で、「これって私が一番？」と感じることを登録しよう。</p>
-          <p>はじめにランキングを検索して本当の一番と生活の順位を競おう！</p>
-        </div>
-        <div class="footer_discription">
-          <h3>自分が一番だと思うランキングがない場合</h3>
-          <p>「自分が一番！」と感じることのランキングがない場合は、それを登録しよう！</p>
-          <p>初めてのランキングではキミが一番だ！！</p>
-          <p>後からやってくる猛者たちを抑えて一番を維持しよう！</p>
-        </div>
-      </div>
+      © 2021 <a href="https://github.com/TatsuyaOkazaki324">Tatsuya Okazaki.</a>
     </div>
   </div>
 </template>
@@ -60,42 +94,61 @@
 
 export default {
   name: "App",
-  components: {
-    // MenubarIcon,
-  },
   data() {
     return {
-      disp_rank_card_infos: [
+      search_text: "",
+      disp_flag: {
+        isRankCard: false,
+        isNotRankCard: false,
+        isLP: true,
+        isSubmit: true,
+      },
+      disp_rank_card_infos: [],
+      rank_card_infos: [
         {
           title: "タイトル１",
-          discription: "これは説明ですタイトル１",
+          description: "これは説明ですタイトル１",
           participants: 300,
         },
         {
           title: "タイトル２",
-          discription: "これは説明ですタイトル２",
+          description: "これは説明ですタイトル２",
           participants: 300,
         },
         {
           title: "タイトル３",
-          discription: "これは説明ですタイトル３",
+          description: "これは説明ですタイトル３",
           participants: 300,
         },
         {
           title: "タイトル４",
-          discription: "これは説明ですタイトル４",
+          description: "これは説明ですタイトル４",
           participants: 300,
         },
       ]
     };
   },
   methods: {
-    hamburger_menu_disp: function () {
-      if (this.hamburger_menu_pos == 0) {
-        this.hamburger_menu_pos = -300;
+    Update_Ranks() {
+      this.disp_rank_card_infos = [];
+      if(this.search_text != "") {
+        this.disp_flag.isRankCard = true;
+        this.disp_flag.isLP = false;
+        for (let Target_Key in this.rank_card_infos) {
+          if (this.rank_card_infos[Target_Key].title.indexOf(this.search_text) > -1) {
+            this.disp_rank_card_infos.push(this.rank_card_infos[Target_Key]);
+          }
+        }
+        if(this.disp_rank_card_infos.length == 0) {
+          this.disp_flag.isNotRankCard = true;
+        }
       } else {
-        this.hamburger_menu_pos = 0;
+        this.disp_flag.isRankCard = false;
+        this.disp_flag.isNotRankCard = false;
+        this.disp_flag.isLP = true;
       }
+      console.log(this.disp_flag.isRankCard)
+      console.log(this.disp_flag.isNotRankCard)
     },
   },
 };
@@ -152,14 +205,48 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: row;
+  flex-direction: column;
 }
+
+
+#LP_container{
+  width: 95%;
+  // height: 500px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  #LP_title{
+    color: #fff;
+    padding: 20px 60px;
+    margin-bottom: 30px;
+    background-color: #0434EC;
+    border-radius: 999px 10px;
+    box-shadow: 0 5px 10px 1px rgb(220, 220, 220);
+  }
+  .LP_text{
+    color: #040C0C;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    width: 400px;
+    padding: 30px;
+    box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
+    font-size: 20px;
+  }
+}
+
+
 #search_result_container{
   width: 60%;
   max-width: 800px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   flex-direction: row;
   flex-wrap: wrap;
   .rank_card_container{
@@ -189,10 +276,10 @@ export default {
       color: white;
       font-weight: bold;
     }
-    .rank_card_discription_container{
+    .rank_card_description_container{
       width: 95%;
       height: 115px;
-      .rank_card_discription{
+      .rank_card_description{
         width: 100%;
         height: 90px;
         display: flex;
@@ -212,28 +299,94 @@ export default {
   }
 }
 
+#submit_container{
+  width: 100%;
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  #submit_title{
+    color: #fff;
+    padding: 20px 60px;
+    margin: 30px;
+    background-color: #0434EC;
+    border-radius: 10px 999px;
+    box-shadow: 0 5px 10px 1px rgb(220, 220, 220);
+  }
+  #submit_form_container{
+    width: 40%;
+    min-width: 500px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    .form_label{
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    #input_title{
+      outline: none;
+      width: 80%;
+      min-width:300px;
+      height:30px;
+      border-radius: 20px;
+      padding: 10px;
+      border: solid #2c3e50 1px;
+    }
+    #input_time{
+      outline: none;
+      width: 100px;
+      height:30px;
+      border-radius: 20px;
+      padding: 10px;
+      border: solid #2c3e50 1px;
+      text-align: right
+    }
+    textarea {
+      outline: none;
+      resize: none;
+      width: 80%;
+      min-width:300px;
+      height:200px;
+      border-radius: 10px;
+      padding: 10px;
+      border: solid #2c3e50 1px;
+    }
+    #submit_button{
+      cursor: pointer;
+      color: #fff;
+      background-color: #0434EC;
+      width: 250px;
+      height: 50px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 99px;
+      box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
+      &:hover{
+        box-shadow: 0 1px 1px 1px rgb(200, 200, 200);
+      }
+    }
+  }
+}
+
 #footer_container{
+  background-color: #DCEEFC;
   width: 100vw;
-  padding-top: 30px;
+  padding: 10px 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  #footer_discription_container{
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    .footer_discription{
-      width: 40%;
-      margin: 20px;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      flex-direction: column;
-    }
-  }
+  flex-direction: row;
 }
 
 

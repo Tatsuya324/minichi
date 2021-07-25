@@ -12,13 +12,23 @@
         <div id="modal_description">
           {{ modal_info.description }}
         </div>
-        <p class="modal_label">参加者{{ modal_info.participants }}人</p>
-        <p class="modal_label">かかった時間</p>
-        <div>
-          <input id="modal_input_time" type="number" />
-          秒
+        <div v-if="disp_flag.isResultModal">
+          <p class="modal_label">かかった時間 {{ enroll_time }} 秒</p>
+          <p class="modal_label">
+            参加者{{ modal_info.participants + 1 }}人中{{ rank }}番目
+          </p>
         </div>
-        <div id="modal_submit_button">ランキングに登録</div>
+        <div v-else>
+          <p class="modal_label">参加者{{ modal_info.participants }}人</p>
+          <p class="modal_label">かかった時間</p>
+          <div>
+            <input id="modal_input_time" type="number" v-model="enroll_time" />
+            秒
+          </div>
+          <div id="modal_submit_button" @click="Enroll_rank">
+            ランキングに登録
+          </div>
+        </div>
       </div>
     </div>
     <div id="nav">
@@ -34,7 +44,12 @@
         <div id="signin_container">
           <div v-if="isLogin">
             <img
-              style="width: 50px; margin-right: 15px; border-radius: 15px; box-shadow: 0 5px 10px 1px rgb(200, 200, 200);"
+              style="
+                width: 50px;
+                margin-right: 15px;
+                border-radius: 15px;
+                box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
+              "
               v-bind:src="authUserIcon"
               alt=""
             />
@@ -118,15 +133,23 @@
             id="input_title"
             type="text"
             placeholder="ランキングのタイトルを入力"
+            v-model="newData.title"
           />
           <p class="form_label">説明</p>
-          <textarea name="説明" cols="30" rows="10"></textarea>
+          <textarea
+            name="説明"
+            cols="30"
+            rows="10"
+            v-model="newData.description"
+          ></textarea>
           <p class="form_label">かかった時間</p>
           <div>
-            <input id="input_time" type="number" />
+            <input id="input_time" type="number" v-model="newData.time" />
             秒
           </div>
-          <div id="submit_button">ランキングを作る</div>
+          <div id="submit_button" @click="Enroll_New_ranking">
+            ランキングを作る
+          </div>
         </div>
       </div>
     </div>
@@ -148,44 +171,74 @@ export default {
       authUserIcon: "",
       authUid: "",
       search_text: "",
+      enroll_time: "",
+      rank: "",
+      newData: {
+        title: "",
+        description: "",
+        time: "",
+      },
       disp_flag: {
         isRankCard: false,
         isNotRankCard: false,
         isLP: true,
         isSubmit: true,
         isEnrollModal: false,
+        isResultModal: false,
       },
       modal_info: {
+        key: "",
         title: "",
         description: "",
         participants: "",
+        members: [],
       },
       disp_rank_card_infos: [],
-      rank_card_infos: [
-        {
-          title: "タイトル１",
-          description: "これは説明ですタイトル１",
-          participants: 300,
-        },
-        {
-          title: "タイトル２",
-          description: "これは説明ですタイトル２",
-          participants: 300,
-        },
-        {
-          title: "タイトル３",
-          description: "これは説明ですタイトル３",
-          participants: 300,
-        },
-        {
-          title: "タイトル４",
-          description: "これは説明ですタイトル４",
-          participants: 300,
-        },
-      ],
+      rank_card_infos: [],
     };
   },
   methods: {
+    Enroll_rank() {
+      firebase
+        .database()
+        .ref(
+          "rankings/" +
+            this.modal_info.key +
+            "/members/member" +
+            (this.modal_info.participants + 1)
+        )
+        .set({
+          time: this.enroll_time,
+          uid: this.authUid,
+        });
+      this.disp_flag.isResultModal = true;
+      let rank = 1;
+      for (let member of Object.keys(this.modal_info.members)) {
+        if (this.modal_info.members[member].time * 1 < this.enroll_time * 1) {
+          rank++;
+        }
+      }
+      this.rank = rank;
+    },
+    Enroll_New_ranking() {
+      firebase
+        .database()
+        .ref("rankings/ranking" + (this.rank_card_infos.length + 1))
+        .set({
+          description: this.newData.description,
+          members: {
+            member1: {
+              time: this.newData.time,
+              uid: this.authUid,
+            },
+          },
+          title: this.newData.title,
+        });
+      this.newData.title = "";
+      this.newData.description = "";
+      this.newData.time = "";
+      alert("ランキングを登録しました！！");
+    },
     Update_Ranks() {
       this.disp_rank_card_infos = [];
       if (this.search_text != "") {
@@ -196,8 +249,6 @@ export default {
             this.rank_card_infos[Target_Key].title.indexOf(this.search_text) >
             -1
           ) {
-            console.log(this.rank_card_infos[Target_Key])
-            console.log(this.rank_card_infos[Target_Key].participants)
             this.disp_rank_card_infos.push(this.rank_card_infos[Target_Key]);
           }
         }
@@ -211,17 +262,18 @@ export default {
         this.disp_flag.isNotRankCard = false;
         this.disp_flag.isLP = true;
       }
-      // console.log(this.disp_flag.isRankCard);
-      // console.log(this.disp_flag.isNotRankCard);
     },
     Modal_trans_data(from) {
       if (from) {
-        this.modal_info.title = from.title;
+        (this.modal_info.key = from.key), (this.modal_info.title = from.title);
         this.modal_info.description = from.description;
         this.modal_info.participants = from.participants;
+        this.modal_info.members = from.members;
         this.disp_flag.isEnrollModal = true;
       } else {
         this.disp_flag.isEnrollModal = false;
+        this.disp_flag.isResultModal = false;
+        this.enroll_time = "";
       }
     },
     signIn() {
@@ -258,13 +310,12 @@ export default {
             let rankings = JSON.parse(JSON.stringify(rawdata.val()));
             for (let ranking of Object.keys(rankings)) {
               prepare = {
+                key: ranking,
                 title: rankings[ranking].title,
                 description: rankings[ranking].description,
                 members: rankings[ranking].members,
                 participants: Object.keys(rankings[ranking].members).length,
               };
-              // console.log(rankings[ranking].members)
-              // console.log(prepare.participants)
               this.rank_card_infos.push(prepare);
             }
           });
@@ -281,6 +332,7 @@ export default {
         let rankings = JSON.parse(JSON.stringify(rawdata.val()));
         for (let ranking of Object.keys(rankings)) {
           prepare = {
+            key: ranking,
             title: rankings[ranking].title,
             description: rankings[ranking].description,
             members: rankings[ranking].members,

@@ -196,6 +196,8 @@ export default {
             this.rank_card_infos[Target_Key].title.indexOf(this.search_text) >
             -1
           ) {
+            console.log(this.rank_card_infos[Target_Key])
+            console.log(this.rank_card_infos[Target_Key].participants)
             this.disp_rank_card_infos.push(this.rank_card_infos[Target_Key]);
           }
         }
@@ -209,8 +211,8 @@ export default {
         this.disp_flag.isNotRankCard = false;
         this.disp_flag.isLP = true;
       }
-      console.log(this.disp_flag.isRankCard);
-      console.log(this.disp_flag.isNotRankCard);
+      // console.log(this.disp_flag.isRankCard);
+      // console.log(this.disp_flag.isNotRankCard);
     },
     Modal_trans_data(from) {
       if (from) {
@@ -239,6 +241,55 @@ export default {
           console.log(error);
         });
     },
+  },
+  mounted: function () {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // !!userはBoolen変更後反転
+        this.isLogin = !!user;
+        this.authUserIcon = user.photoURL;
+        this.authUid = user.uid;
+        firebase
+          .database()
+          .ref("rankings")
+          .on("value", (rawdata) => {
+            this.rank_card_infos = [];
+            let prepare;
+            let rankings = JSON.parse(JSON.stringify(rawdata.val()));
+            for (let ranking of Object.keys(rankings)) {
+              prepare = {
+                title: rankings[ranking].title,
+                description: rankings[ranking].description,
+                members: rankings[ranking].members,
+                participants: Object.keys(rankings[ranking].members).length,
+              };
+              // console.log(rankings[ranking].members)
+              // console.log(prepare.participants)
+              this.rank_card_infos.push(prepare);
+            }
+          });
+      }
+    });
+  },
+  created() {
+    firebase
+      .database()
+      .ref("rankings")
+      .once("value", (rawdata) => {
+        this.rank_card_infos = [];
+        let prepare;
+        let rankings = JSON.parse(JSON.stringify(rawdata.val()));
+        for (let ranking of Object.keys(rankings)) {
+          prepare = {
+            title: rankings[ranking].title,
+            description: rankings[ranking].description,
+            members: rankings[ranking].members,
+            participants: Object.keys(rankings[ranking].members).length,
+          };
+          // console.log(rankings[ranking].members)
+          this.rank_card_infos.push(prepare);
+        }
+      });
   },
 };
 </script>
@@ -438,7 +489,7 @@ export default {
     cursor: pointer;
     box-shadow: 0 5px 10px 1px rgb(200, 200, 200);
     width: 350px;
-    height: 150px;
+    height: 200px;
     margin: 10px;
     border-radius: 10px;
     display: flex;
@@ -463,10 +514,10 @@ export default {
     }
     .rank_card_description_container {
       width: 95%;
-      height: 115px;
+      height: 165px;
       .rank_card_description {
         width: 100%;
-        height: 90px;
+        height: 140px;
         display: flex;
         justify-content: center;
         align-items: center;
